@@ -2,8 +2,8 @@
 \ GPIO general library
 \    Filename:      gpio.fs
 \    Date:          27 dec 2023
-\    Updated:       27 dec 2023
-\    File Version:  1.0
+\    Updated:       28 dec 2023
+\    File Version:  1.1
 \    Forth:         MECRISP Forth
 \    Author:        Marc PETREMANN
 \    GNU General Public License
@@ -108,5 +108,40 @@ $1F constant IO_BANK0_GPIO0_CTRL_FUNCSEL_BITS
     IO_BANK0_GPIO0_CTRL_FUNCSEL_BITS and
   ;
 
+
+\ Initializes the GPIOx peripheral in GPIO_IN direction
+: gpio_init ( gpio -- )
+    >r
+    r@ GPIO_IN gpio_set_dir
+    r@ GPIO_LOW gpio_put
+    r> GPIO_FUNC_SIO gpio_set_function
+  ;
+
+
+\ Deinitializes the GPIOx peripheral registers to their default reset values
+: gpio_deinit ( gpio -- )
+    GPIO_FUNC_NULL gpio_set_function
+  ;
+
+
+$4001c000 constant PADS_BANK0_BASE  \  User Bank Pad Control registers 
+
+: PAD_CTRL ( n -- addr ) 
+    4 * 4 + PADS_BANK0_BASE + 
+  ;
+
+
+
+
 save
 compiletoram
+
+
+\ *** TODO: ***
+\ doc: https://www.raspberrypi.com/documentation/pico-sdk/gpio_8h.html
+\  gpio_set_irq_enabled 
+\  gpio_get_all (void) Get raw value of all GPIOs. 
+\  gpio_clr_mask (uint32_t mask) Drive low every GPIO appearing in mask. 
+
+
+
