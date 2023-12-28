@@ -1,10 +1,10 @@
 \ *********************************************************************
 \ GPIO general library
 \    Filename:      gpio.fs
-\    Date:          24 dec 2023
-\    Updated:       24 dec 2023
+\    Date:          27 dec 2023
+\    Updated:       27 dec 2023
 \    File Version:  1.0
-\    Forth:         eFORTH RP pico
+\    Forth:         MECRISP Forth
 \    Author:        Marc PETREMANN
 \    GNU General Public License
 \ *********************************************************************
@@ -37,7 +37,7 @@
 \  - state: GPIO_HIGH | GPIO_LOW
 
 
-
+compiletoflash
 
 $D0000000 constant SIO_BASE
 SIO_BASE $020 + constant GPIO_OE
@@ -108,95 +108,5 @@ $1F constant IO_BANK0_GPIO0_CTRL_FUNCSEL_BITS
     IO_BANK0_GPIO0_CTRL_FUNCSEL_BITS and
   ;
 
-\ *** TODO: ***
-\ doc: https://www.raspberrypi.com/documentation/pico-sdk/gpio_8h.html
-\  gpio_set_irq_enabled 
-\  gpio_init (uint gpio)  Initialise a GPIO for (enabled I/O and set func to GPIO_FUNC_SIO) 
-\  gpio_get_all (void) Get raw value of all GPIOs. 
-\  gpio_clr_mask (uint32_t mask) Drive low every GPIO appearing in mask. 
-
-
-\ @TODO to debug
-
-\ An interrupt can be generated for every GPIO pin in 4 scenarios:
-\ * Level High: the GPIO pin is a logical 1
-\ * Level Low: the GPIO pin is a logical 0
-\ * Edge High: the GPIO has transitioned from a logical 0 to a logical 1
-\ * Edge Low: the GPIO has transitioned from a logical 1 to a logical 0
-\ The level interrupts are not latched. This means that if the pin is a logical 1 
-\ and the level high interrupt is active, it will
-\ become inactive as soon as the pin changes to a logical 0. The edge interrupts 
-\ are stored in the INTR register and can be
-\ cleared by writing to the INTR register.
-$1 constant GPIO_IRQ_LEVEL_LOW
-$2 constant GPIO_IRQ_LEVEL_HIGH
-$4 constant GPIO_IRQ_EDGE_FALL
-$8 constant GPIO_IRQ_EDGE_RISE
-
-
-
-
-
-
-\ ******************************************************************************
-\  ADC GPIO
-\ ******************************************************************************
-
-\ *** TODO: ***
-\ doc: https://www.raspberrypi.com/documentation/pico-sdk/gpio_8h.html
-\  adc_gpio_init adc_gpio_init 	( 	uint  	gpio 	) 	
-
-$00000040 constant PADS_BANK0_GPIO0_IE_BITS
-
-\ void gpio_set_input_enabled(uint gpio, bool enabled) {
-\     if (enabled)
-\         hw_set_bits(&padsbank0_hw->io[gpio], PADS_BANK0_GPIO0_IE_BITS);
-\     else
-\         hw_clear_bits(&padsbank0_hw->io[gpio], PADS_BANK0_GPIO0_IE_BITS);
-\ }
-
-: gpio_set_input_enabled ( gpio bool -- )
-    if
-    else    
-    rhen
-  ;
-
-\ static inline void adc_gpio_init(uint gpio) {
-\     invalid_params_if(ADC, gpio < 26 || gpio > 29);
-\     // Select NULL function to make output driver hi-Z
-\     gpio_set_function(gpio, GPIO_FUNC_NULL);
-\     // Also disable digital pulls and digital receiver
-\     gpio_disable_pulls(gpio);
-\     gpio_set_input_enabled(gpio, false);
-\ }
-
-
-\ ******************************************************************************
-\  PWM GPIO
-\ ******************************************************************************
-
-
-
-
-
-\ ******************************************************************************
-\  SPI GPIO
-\ ******************************************************************************
-
-
-
-
-
-\ ******************************************************************************
-\  I2C GPIO
-\ ******************************************************************************
-
-
-
-
-
-\ ******************************************************************************
-\  SSI GPIO
-\ ******************************************************************************
-
-
+save
+compiletoram
