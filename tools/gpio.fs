@@ -2,8 +2,8 @@
 \ GPIO general library
 \    Filename:      gpio.fs
 \    Date:          27 dec 2023
-\    Updated:       28 dec 2023
-\    File Version:  1.1
+\    Updated:       29 dec 2023
+\    File Version:  1.2
 \    Forth:         MECRISP Forth
 \    Author:        Marc PETREMANN
 \    GNU General Public License
@@ -29,7 +29,7 @@
 \ gpio_set_dir    ( gpio direction -- ) 
 \  Parameters:
 \  - gpio: between [2..30]
-\  - direction: GPIO_OUT | GPIO_IN 
+\  - direction: GPIO-OUT | GPIO-IN 
 
 \ gpio_put ( gpio state -- )
 \  Parameters:
@@ -57,8 +57,8 @@ SIO_BASE $01c + constant GPIO_OUT_XOR   \ GPIO output value XOR
     1 swap lshift
   ;
 
-1 constant GPIO_OUT   \ set direction OUTput mode
-0 constant GPIO_IN    \ set direction INput mode
+1 constant GPIO-OUT   \ set direction OUTput mode
+0 constant GPIO-IN    \ set direction INput mode
 
 \ set direction for selected gpio
 : gpio_set_dir  ( gpio direction -- )
@@ -77,7 +77,8 @@ SIO_BASE $01c + constant GPIO_OUT_XOR   \ GPIO output value XOR
 
 \ Get state of a single specified GPIO 
 : gpio_get ( gpio -- state )
-    PIN_MASK GPIO_IN @
+    PIN_MASK 
+    GPIO_IN @  and
   ;
 
 $40014000 constant IO_BANK0_BASE
@@ -131,17 +132,14 @@ $4001c000 constant PADS_BANK0_BASE  \  User Bank Pad Control registers
   ;
 
 
+$00000040 constant PADS_BANK0_GPIO0_IE_BITS
 
-
-save
-compiletoram
-
-
-\ *** TODO: ***
-\ doc: https://www.raspberrypi.com/documentation/pico-sdk/gpio_8h.html
-\  gpio_set_irq_enabled 
-\  gpio_get_all (void) Get raw value of all GPIOs. 
-\  gpio_clr_mask (uint32_t mask) Drive low every GPIO appearing in mask. 
-
-
+\ used to enable/disable the input at the pad
+: gpio_set_input_enabled ( gpio enabled -- )
+    if
+        PADS_BANK0_GPIO0_IE_BITS swap PAD_CTRL bis!
+    else
+        PADS_BANK0_GPIO0_IE_BITS swap PAD_CTRL bic!
+    then
+  ;
 
