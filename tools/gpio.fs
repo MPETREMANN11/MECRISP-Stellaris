@@ -143,3 +143,7 @@ $00000040 constant PADS_BANK0_GPIO0_IE_BITS
     then
   ;
 
+
+save
+compiletoram
+
