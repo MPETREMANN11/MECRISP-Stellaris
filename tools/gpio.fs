@@ -2,9 +2,10 @@
 \ GPIO general library
 \    Filename:      gpio.fs
 \    Date:          27 dec 2023
-\    Updated:       30 dec 2023
-\    File Version:  1.3
-\    Forth:         MECRISP Forth RR2040
+\    Updated:       01 jan 2024
+\    File Version:  1.4
+\    Forth:         MECRISP Forth RP2040
+\    Board:         Raspberry pico
 \    Author:        Marc PETREMANN
 \    GNU General Public License
 \ *********************************************************************
@@ -187,16 +188,12 @@ $00000040 constant PADS_BANK0_GPIO0_IE_BITS
   ;
 
 
+$4000C000 constant RESETS_BASE    \ reset control
+RESETS_BASE $00 + constant RESETS_RESET
+RESETS_BASE $04 + constant RESETS_WDSEL
+RESETS_BASE $08 + constant RESETS_RESET_DONE
+
 
 save
 compiletoram
-
-
-\ *** TODO: ***
-\ doc: https://www.raspberrypi.com/documentation/pico-sdk/gpio_8h.html
-\  gpio_set_irq_enabled 
-\  gpio_get_all (void) Get raw value of all GPIOs. 
-\  gpio_clr_mask (uint32_t mask) Drive low every GPIO appearing in mask. 
-
-
 
