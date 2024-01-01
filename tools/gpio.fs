@@ -2,9 +2,9 @@
 \ GPIO general library
 \    Filename:      gpio.fs
 \    Date:          27 dec 2023
-\    Updated:       29 dec 2023
-\    File Version:  1.2
-\    Forth:         MECRISP Forth
+\    Updated:       30 dec 2023
+\    File Version:  1.3
+\    Forth:         MECRISP Forth RR2040
 \    Author:        Marc PETREMANN
 \    GNU General Public License
 \ *********************************************************************
@@ -34,10 +34,21 @@
 \ gpio_put ( gpio state -- )
 \  Parameters:
 \  - gpio: between [2..30]
-\  - state: GPIO_HIGH | GPIO_LOW
+\  - state: GPIO-HIGH | GPIO-LOW
 
 
 compiletoflash
+
+30 constant NUM_BANK0_GPIOS
+
+\ test GPIO and abort if gpio num > 30
+\ abort program if GPIO num is bad
+: check_gpio_param ( gpio -- )
+    NUM_BANK0_GPIOS > if
+        ." GPIO num. error!" quit
+    then
+  ;
+
 
 $D0000000 constant SIO_BASE
 SIO_BASE $020 + constant GPIO_OE
@@ -99,6 +110,7 @@ $40014000 constant IO_BANK0_BASE
 $f constant GPIO_FUNC_NULL
 
 : gpio_set_function ( gpio function -- )
+    over check_gpio_param       \ abort if bad GPIO num
     swap GPIO_CTRL !
   ;
 
@@ -144,6 +156,47 @@ $00000040 constant PADS_BANK0_GPIO0_IE_BITS
   ;
 
 
+3 constant PADS_BANK0_GPIO0_PUE_LSB
+2 constant PADS_BANK0_GPIO0_PDE_LSB
+
+: gpio_set_pulls ( gpio up down -- )    \ @TODO: à vérifier
+    rot >r
+    r@ check_gpio_param         \ abort if num GPIO is bad
+    \ Pull down enable
+    if    PADS_BANK0_GPIO0_PDE_LSB r@ PAD_CTRL bis!
+    else  PADS_BANK0_GPIO0_PDE_LSB r@ PAD_CTRL bic!    then
+    \ Pull up enable
+    if    PADS_BANK0_GPIO0_PUE_LSB r@ PAD_CTRL bis!
+    else  PADS_BANK0_GPIO0_PUE_LSB r@ PAD_CTRL bic!    then
+    rdrop
+  ;
+
+\ Disable pulls on specified GPIO
+: gpio_disable_pulls ( gpio -- )    \ @TODO: à vérifier
+    0 0 gpio_set_pulls
+  ;
+
+\ Set specified GPIO to be pulled down
+: gpio_pull_down ( gpio -- )    \ @TODO: à vérifier
+    0 1 gpio_set_pulls
+  ;
+
+\ Set specified GPIO to be pulled up
+: gpio_pull_up ( gpio -- )    \ @TODO: à vérifier
+    1 0 gpio_set_pulls
+  ;
+
+
+
 save
 compiletoram
+
+
+\ *** TODO: ***
+\ doc: https://www.raspberrypi.com/documentation/pico-sdk/gpio_8h.html
+\  gpio_set_irq_enabled 
+\  gpio_get_all (void) Get raw value of all GPIOs. 
+\  gpio_clr_mask (uint32_t mask) Drive low every GPIO appearing in mask. 
+
+
 
